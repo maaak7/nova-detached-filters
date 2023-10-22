@@ -78,7 +78,7 @@ export default {
     this.initialiseIsCollapsed();
 
     if (this.isPersisting) {
-      if (this.persistedFilters && this.persistedFilters[this.resourceName]) this.loadPersistedFilters();
+      if (this.persistedFilters && this.persistedFilters[this.cardName]) this.loadPersistedFilters();
       else this.initializePersistedFilters();
     }
   },
@@ -98,7 +98,7 @@ export default {
     },
 
     resetFilter(filter) {
-      this.$store.commit(`${this.resourceName}/updateFilterState`, {
+      this.$store.commit(`${this.cardName}/updateFilterState`, {
         filterClass: filter.class,
         value: null,
       });
@@ -112,9 +112,9 @@ export default {
 
     toggleIsPersisting() {
       if (!this.persistedResources) this.persistedResources = {};
-      if (this.persistedResources[this.resourceName]) this.persistedResources[this.resourceName] = [];
+      if (this.persistedResources[this.cardName]) this.persistedResources[this.cardName] = [];
 
-      this.persistedResources[this.resourceName] = !this.isPersisting;
+      this.persistedResources[this.cardName] = !this.isPersisting;
       this.isPersisting = !this.isPersisting;
 
       localStorage.setItem('PERSIST_DETACHED_FILTERS', JSON.stringify(this.persistedResources));
@@ -125,17 +125,17 @@ export default {
 
     toggleIsCollapsed() {
       if (!this.collapsedResources) this.collapsedResources = {};
-      if (this.collapsedResources[this.resourceName]) this.collapsedResources[this.resourceName] = [];
+      if (this.collapsedResources[this.cardName]) this.collapsedResources[this.cardName] = [];
 
-      this.collapsedResources[this.resourceName] = !this.isCollapsed;
+      this.collapsedResources[this.cardName] = !this.isCollapsed;
       this.isCollapsed = !this.isCollapsed;
 
       localStorage.setItem('COLLAPSED_DETACHED_FILTERS', JSON.stringify(this.collapsedResources));
     },
 
     loadPersistedFilters() {
-      this.persistedFilters[this.resourceName].forEach(filterItem => {
-        this.$store.commit(`${this.resourceName}/updateFilterState`, {
+      this.persistedFilters[this.cardName].forEach(filterItem => {
+        this.$store.commit(`${this.cardName}/updateFilterState`, {
           filterClass: filterItem.filterClass,
           value: filterItem.value,
         });
@@ -150,16 +150,16 @@ export default {
         const updatedFilter = this.getFilter(filter.class);
         if (!updatedFilter) return;
         // Get filter index in localStorage;
-        const filterIndex = this.persistedFilters[this.resourceName].findIndex(f => filter.class === f.filterClass);
-        if (filterIndex == null || filterIndex < 0 || !this.persistedFilters[this.resourceName][filterIndex]) {
+        const filterIndex = this.persistedFilters[this.cardName].findIndex(f => filter.class === f.filterClass);
+        if (filterIndex == null || filterIndex < 0 || !this.persistedFilters[this.cardName][filterIndex]) {
           // If key-value pair doesn't exist in localStorage, save new
-          this.persistedFilters[this.resourceName].push({
+          this.persistedFilters[this.cardName].push({
             filterClass: filter.class,
             value: updatedFilter.currentValue,
           });
         } else {
           // If exists, update value
-          this.persistedFilters[this.resourceName][filterIndex].value = updatedFilter.currentValue;
+          this.persistedFilters[this.cardName][filterIndex].value = updatedFilter.currentValue;
         }
 
         localStorage.setItem('PERSISTED_DETACHED_FILTERS', JSON.stringify(this.persistedFilters));
@@ -169,16 +169,16 @@ export default {
     },
 
     getFilter(filterKey) {
-      return this.$store.getters[`${this.resourceName}/getFilter`](filterKey);
+      return this.$store.getters[`${this.cardName}/getFilter`](filterKey);
     },
 
     getFilters() {
-      return this.$store.getters[`${this.resourceName}/filters`];
+      return this.$store.getters[`${this.cardName}/filters`];
     },
 
     initializePersistedFilters() {
       if (!this.persistedFilters) this.persistedFilters = {};
-      this.persistedFilters[this.resourceName] = [];
+      this.persistedFilters[this.cardName] = [];
 
       localStorage.setItem('PERSISTED_DETACHED_FILTERS', JSON.stringify(this.persistedFilters));
     },
@@ -193,7 +193,7 @@ export default {
      */
     loadPersistedFromFilters() {
       this.getFilters().forEach(filterItem => {
-        this.persistedFilters[this.resourceName].push({
+        this.persistedFilters[this.cardName].push({
           filterClass: filterItem.class,
           value: filterItem.currentValue,
         });
@@ -216,14 +216,14 @@ export default {
     },
 
     initialiseIsPersisting() {
-      if (!this.persistedResources || !this.persistedResources[this.resourceName])
+      if (!this.persistedResources || !this.persistedResources[this.cardName])
         return (this.isPersisting = this.card.persistFiltersDefault);
-      this.isPersisting = this.persistedResources[this.resourceName];
+      this.isPersisting = this.persistedResources[this.cardName];
     },
 
     initialiseIsCollapsed() {
-      if (!this.collapsedResources || !this.collapsedResources[this.resourceName]) return (this.isCollapsed = false);
-      this.isCollapsed = this.collapsedResources[this.resourceName];
+      if (!this.collapsedResources || !this.collapsedResources[this.cardName]) return (this.isCollapsed = false);
+      this.isCollapsed = this.collapsedResources[this.cardName];
     },
   },
 
@@ -231,6 +231,9 @@ export default {
     hasAnyActions() {
       return this.card.withReset || this.card.withToggle || this.card.persistFilters;
     },
+    cardName() {
+      return this.card.name || this.resourceName;
+    }
   },
 };
 </script>
